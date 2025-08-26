@@ -1,0 +1,11 @@
+import { Router } from "express";
+import auth from "../middleware/auth.js";
+import * as c from "../controllers/productController.js";
+const r = Router();
+r.use(auth);
+r.get("/", c.list);
+r.get("/barcode/:barcode", c.byBarcode);
+r.post("/", c.create);
+r.put("/:id", c.update);
+r.delete("/:id", c.remove);
+export default r;
