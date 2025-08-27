@@ -5,9 +5,9 @@ const PORT = process.env.PORT || 5000;
 
 connectDB()
   .then(() => {
-    app.listen(PORT, () =>
-      console.log(`API running on http://localhost:${PORT}`)
-    );
+    app.get("/", (req, res) => {
+      res.send("WELCOME TO Gihan POS API!");
+    });
   })
   .catch((err) => {
     console.error("DB connection failed", err);
