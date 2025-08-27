@@ -13,7 +13,7 @@ export async function registerCtrl(req, res, next) {
     const user = await signup({ username, password })
     const token = signToken({ id: user._id, role: user.role })
     res.cookie('token', token, cookieOptions)
-    res.status(201).json({ user: safe(user) })
+    res.status(201).json({ user: safe(user), token })
   } catch (err) { next(err) }
 }
 
@@ -23,7 +23,7 @@ export async function loginCtrl(req, res, next) {
     const user = await login({ username, password })
     const token = signToken({ id: user._id, role: user.role })
     res.cookie('token', token, cookieOptions)
-    res.json({ user: safe(user) })
+    res.json({ user: safe(user), token })
   } catch (err) { next(err) }
 }
 

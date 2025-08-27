@@ -25,14 +25,33 @@ const PORT = process.env.PORT || 5000;
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: [
+      process.env.CLIENT_URL || "http://localhost:5173",
+      "https://pos-mern-single-user.vercel.app",
+      "https://pos-mern-single-user-git-main-ima-69.vercel.app"
+    ],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   })
 );
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
 app.use("/uploads", express.static("uploads"));
+
+// Cookie security settings for production
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    res.cookie('token', req.cookies?.token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      domain: process.env.COOKIE_DOMAIN || '.vercel.app'
+    });
+    next();
+  });
+}
 
 // Routes
 app.use("/api/health", healthRoutes);

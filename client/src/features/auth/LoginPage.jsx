@@ -27,7 +27,11 @@ export default function LoginPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      await login({ username, password }).unwrap();
+      const result = await login({ username, password }).unwrap();
+      // Store token in localStorage as fallback for Vercel deployment
+      if (result.token) {
+        localStorage.setItem('token', result.token);
+      }
       navigate("/sales");
     } catch (e) {
       /* handled below */

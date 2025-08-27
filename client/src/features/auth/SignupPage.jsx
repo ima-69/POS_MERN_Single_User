@@ -32,10 +32,14 @@ export default function SignupPage() {
     e.preventDefault();
     if (form.password !== form.confirm) return alert("Passwords do not match");
     try {
-      await signup({
+      const result = await signup({
         username: form.username,
         password: form.password,
       }).unwrap();
+      // Store token in localStorage as fallback for Vercel deployment
+      if (result.token) {
+        localStorage.setItem('token', result.token);
+      }
       navigate("/login");
     } catch (e) {
       /* show below */

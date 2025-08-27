@@ -17,6 +17,8 @@ export default function AppLayout() {
 
   async function handleLogout() {
     await logout().unwrap()
+    // Clear token from localStorage
+    localStorage.removeItem('token')
     navigate('/login')
   }
 
