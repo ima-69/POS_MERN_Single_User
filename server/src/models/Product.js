@@ -7,6 +7,7 @@ const productSchema = new mongoose.Schema(
     costPrice: { type: Number, required: true, min: 0 },
     retailPrice: { type: Number, required: true, min: 0 },
     qty: { type: Number, required: true, min: 0 },
+    grnNumber: { type: String, trim: true },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
@@ -23,5 +24,6 @@ const productSchema = new mongoose.Schema(
 );
 
 productSchema.index({ name: "text", barcode: "text" });
+productSchema.index({ grnNumber: 1 });
 
 export default mongoose.model("Product", productSchema);

@@ -25,6 +25,7 @@ export async function addProd(data) {
     costPrice,
     retailPrice,
     qty,
+    grnNumber,
     category,
     supplier,
     image,
@@ -42,6 +43,7 @@ export async function addProd(data) {
     costPrice: Number(costPrice),
     retailPrice: Number(retailPrice),
     qty: Number(qty),
+    grnNumber: grnNumber || null,
     category,
     supplier: supplier || null,
     image: image?.url
@@ -68,6 +70,7 @@ export async function editProd(id, data) {
     retailPrice:
       data.retailPrice != null ? Number(data.retailPrice) : prod.retailPrice,
     qty: data.qty != null ? Number(data.qty) : prod.qty,
+    grnNumber: data.grnNumber != null ? data.grnNumber : prod.grnNumber,
     image: data.image?.url
       ? { url: data.image.url, publicId: data.image.publicId }
       : prod.image,
@@ -75,3 +78,13 @@ export async function editProd(id, data) {
 }
 
 export const removeProd = (id) => deleteProduct(id);
+
+export async function addQuantity(id, quantityToAdd) {
+  const prod = await findProductById(id);
+  if (!prod) throw err("Product not found", 404);
+  
+  const newQuantity = Number(prod.qty) + Number(quantityToAdd);
+  if (newQuantity < 0) throw err("Quantity cannot be negative");
+  
+  return updateProduct(id, { qty: newQuantity });
+}

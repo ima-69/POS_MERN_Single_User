@@ -36,6 +36,17 @@ export const productsApi = api.injectEndpoints({
         { type: "Product", id: "LIST" },
       ],
     }),
+    addQuantity: build.mutation({
+      query: ({ id, quantity }) => ({
+        url: `/products/${id}/add-quantity`,
+        method: "PUT",
+        body: { quantity },
+      }),
+      invalidatesTags: (r, e, arg) => [
+        { type: "Product", id: arg.id },
+        { type: "Product", id: "LIST" },
+      ],
+    }),
   }),
 });
 export const {
@@ -43,5 +54,6 @@ export const {
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
+  useAddQuantityMutation,
   useLazyGetProductByBarcodeQuery,
 } = productsApi;

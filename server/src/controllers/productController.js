@@ -26,3 +26,8 @@ export const byBarcode = (req, res, next) =>
       p ? res.json(p) : res.status(404).json({ message: "Not found" })
     )
     .catch(next);
+export const addQuantity = (req, res, next) =>
+  s
+    .addQuantity(req.params.id, req.body.quantity)
+    .then((d) => res.json(d))
+    .catch(next);

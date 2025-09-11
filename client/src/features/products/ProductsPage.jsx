@@ -4,6 +4,7 @@ import {
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
+  useAddQuantityMutation,
   useLazyGetProductByBarcodeQuery,
 } from "./productsApi";
 import { useGetCategoriesQuery } from "../categories/categoriesApi";
@@ -22,6 +23,8 @@ export default function ProductsPage() {
     costPrice: "",
     retailPrice: "",
     qty: "",
+    qtyToAdd: "",
+    grnNumber: "",
     category: "",
     supplier: "",
     image: null,
@@ -33,6 +36,7 @@ export default function ProductsPage() {
   const [createProduct] = useCreateProductMutation();
   const [updateProduct] = useUpdateProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
+  const [addQuantity] = useAddQuantityMutation();
   const [uploadImage, { isLoading: isUploading }] = useUploadImageMutation();
   const [triggerBarcode] = useLazyGetProductByBarcodeQuery();
 
@@ -50,6 +54,8 @@ export default function ProductsPage() {
       costPrice: p.costPrice,
       retailPrice: p.retailPrice,
       qty: p.qty,
+      qtyToAdd: "",
+      grnNumber: p.grnNumber || "",
       category: p.category?._id || p.category,
       supplier: p.supplier?._id || p.supplier || "",
       image: p.image || null,
@@ -67,6 +73,8 @@ export default function ProductsPage() {
       costPrice: "",
       retailPrice: "",
       qty: "",
+      qtyToAdd: "",
+      grnNumber: "",
       category: "",
       supplier: "",
       image: null,
@@ -117,6 +125,7 @@ export default function ProductsPage() {
         costPrice: Number(form.costPrice || 0),
         retailPrice: Number(form.retailPrice || 0),
         qty: Number(form.qty || 0),
+        grnNumber: form.grnNumber || undefined,
         supplier: form.supplier || undefined,
       };
       await createProduct(payload).unwrap();
@@ -138,6 +147,7 @@ export default function ProductsPage() {
         costPrice: Number(form.costPrice || 0),
         retailPrice: Number(form.retailPrice || 0),
         qty: Number(form.qty || 0),
+        grnNumber: form.grnNumber || undefined,
         supplier: form.supplier || undefined,
       };
       await updateProduct(payload).unwrap();
@@ -145,6 +155,20 @@ export default function ProductsPage() {
       clear();
     } catch (err) {
       setErrorMsg(err?.data?.message || "Failed to update product");
+    }
+  }
+
+  async function handleAddQuantity() {
+    setErrorMsg("");
+    setSuccessMsg("");
+    if (!selectedId || !form.qtyToAdd) return;
+    try {
+      await addQuantity({ id: selectedId, quantity: Number(form.qtyToAdd) }).unwrap();
+      setSuccessMsg(`Added ${form.qtyToAdd} units to product`);
+      // Update the current quantity display
+      setForm(prev => ({ ...prev, qty: Number(prev.qty) + Number(form.qtyToAdd), qtyToAdd: "" }));
+    } catch (err) {
+      setErrorMsg(err?.data?.message || "Failed to add quantity");
     }
   }
 
@@ -280,7 +304,7 @@ export default function ProductsPage() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">
-                    Quantity
+                    Current Quantity
                   </label>
                   <input
                     type="number"
@@ -288,8 +312,34 @@ export default function ProductsPage() {
                     onChange={(e) => setForm({ ...form, qty: e.target.value })}
                     className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                     placeholder="0"
+                    readOnly={selectedId ? true : false}
                   />
                 </div>
+
+                {selectedId && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">
+                      Add Quantity
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        value={form.qtyToAdd}
+                        onChange={(e) => setForm({ ...form, qtyToAdd: e.target.value })}
+                        className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                        placeholder="Enter quantity to add"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddQuantity}
+                        disabled={!form.qtyToAdd || Number(form.qtyToAdd) <= 0}
+                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 text-sm font-medium"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Right Column */}
@@ -332,6 +382,19 @@ export default function ProductsPage() {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">
+                    GRN Number
+                  </label>
+                  <input
+                    type="text"
+                    value={form.grnNumber}
+                    onChange={(e) => setForm({ ...form, grnNumber: e.target.value })}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                    placeholder="Enter GRN number"
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -507,7 +570,7 @@ export default function ProductsPage() {
                     />
                   </svg>
                   <span className="hidden xs:inline">Delete</span>
-                  <span className="xs:hidden">Del</span>
+                  <span className="xs:hidden">Delete</span>
                 </button>
 
                 <button
@@ -709,6 +772,11 @@ export default function ProductsPage() {
                             <div className="text-xs text-gray-500">
                               {p.category?.name || "No category"}
                             </div>
+                            {p.grnNumber && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                GRN: {p.grnNumber}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -744,6 +812,9 @@ export default function ProductsPage() {
                   </th>
                   <th className="px-3 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Supplier
+                  </th>
+                  <th className="px-3 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    GRN Number
                   </th>
                   <th className="px-3 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Image
@@ -798,6 +869,9 @@ export default function ProductsPage() {
                     </td>
                     <td className="px-3 lg:px-6 py-4 text-xs lg:text-sm text-gray-700 truncate max-w-[100px]">
                       {p.supplier?.name || "-"}
+                    </td>
+                    <td className="px-3 lg:px-6 py-4 text-xs lg:text-sm text-gray-700 truncate max-w-[100px]">
+                      {p.grnNumber || "-"}
                     </td>
                     <td className="px-3 lg:px-6 py-4">
                       {p.image?.url ? (
