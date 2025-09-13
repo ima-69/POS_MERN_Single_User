@@ -34,3 +34,13 @@ export async function editCus(id, data) {
 }
 
 export const removeCus = (id) => deleteCustomer(id);
+
+export async function updatePaidAmount(id, paidAmount) {
+  const customer = await findCustomerById(id);
+  if (!customer) throw err("Customer not found", 404);
+  
+  if (paidAmount < 0) throw err("Paid amount cannot be negative");
+  if (paidAmount > customer.purchasedAmount) throw err("Paid amount cannot exceed purchased amount");
+  
+  return updateCustomer(id, { paidAmount });
+}

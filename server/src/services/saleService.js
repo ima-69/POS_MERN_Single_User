@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Product from "../models/Product.js";
 import InvoiceCounter from "../models/InvoiceCounter.js";
 import Sale from "../models/Sale.js";
+import Customer from "../models/Customer.js";
 
 
 const err = (m, s = 400) => {
@@ -78,9 +79,39 @@ export async function createSale(userId, payload) {
     grandTotal,
     paidAmount,
     balance,
-    customer: payload.customer || null,
+    customer: payload.customerId || null,
     cashier: userId,
   });
+
+  // Update customer's financial details if customer is selected
+  if (payload.customerId) {
+    try {
+      console.log(`Updating customer ${payload.customerId} with purchasedAmount: +${grandTotal}, paidAmount: +${paidAmount}`);
+      
+      const customerUpdate = {
+        $inc: { purchasedAmount: grandTotal }
+      };
+      
+      // Always update paidAmount if there's any payment (even if it's 0, it's still a valid payment)
+      customerUpdate.$inc.paidAmount = paidAmount;
+      
+      const updatedCustomer = await Customer.findByIdAndUpdate(
+        payload.customerId,
+        customerUpdate,
+        { new: true }
+      );
+      
+      if (!updatedCustomer) {
+        console.warn(`Customer with ID ${payload.customerId} not found during sale update`);
+      } else {
+        console.log(`Successfully updated customer ${updatedCustomer.name}: purchasedAmount=${updatedCustomer.purchasedAmount}, paidAmount=${updatedCustomer.paidAmount}`);
+      }
+    } catch (error) {
+      console.error('Error updating customer financial details:', error);
+      // Don't throw error here as sale is already completed
+    }
+  }
+
   return sale;
 }
 

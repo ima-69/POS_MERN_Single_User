@@ -18,7 +18,11 @@ export const suppliersApi = api.injectEndpoints({
     deleteSupplier: build.mutation({
       query: (id) => ({ url: `/suppliers/${id}`, method: 'DELETE' }),
       invalidatesTags: (r,e,arg) => [{ type: 'Supplier', id: arg }, { type: 'Supplier', id: 'LIST' }]
+    }),
+    updatePaidAmount: build.mutation({
+      query: ({ id, paidAmount }) => ({ url: `/suppliers/${id}/paid-amount`, method: 'PUT', body: { paidAmount } }),
+      invalidatesTags: (r,e,arg) => [{ type: 'Supplier', id: arg.id }, { type: 'Supplier', id: 'LIST' }]
     })
   })
 })
-export const { useGetSuppliersQuery, useCreateSupplierMutation, useUpdateSupplierMutation, useDeleteSupplierMutation } = suppliersApi
+export const { useGetSuppliersQuery, useCreateSupplierMutation, useUpdateSupplierMutation, useDeleteSupplierMutation, useUpdatePaidAmountMutation } = suppliersApi

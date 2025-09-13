@@ -33,6 +33,17 @@ export const customersApi = api.injectEndpoints({
         { type: "Customer", id: "LIST" },
       ],
     }),
+    updatePaidAmount: build.mutation({
+      query: ({ id, paidAmount }) => ({ 
+        url: `/customers/${id}/paid-amount`, 
+        method: 'PUT', 
+        body: { paidAmount } 
+      }),
+      invalidatesTags: (r,e,arg) => [
+        { type: 'Customer', id: arg.id }, 
+        { type: 'Customer', id: 'LIST' }
+      ]
+    }),
   }),
 });
 export const {
@@ -40,4 +51,5 @@ export const {
   useCreateCustomerMutation,
   useUpdateCustomerMutation,
   useDeleteCustomerMutation,
+  useUpdatePaidAmountMutation,
 } = customersApi;

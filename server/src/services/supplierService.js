@@ -39,3 +39,11 @@ export async function removeSup(id) {
   if (used > 0) throw err("Cannot delete: supplier used by products");
   return deleteSupplier(id);
 }
+
+export async function updatePaidAmount(id, paidAmount) {
+  const sup = await findSupplierById(id);
+  if (!sup) throw err("Supplier not found", 404);
+  if (paidAmount < 0) throw err("Paid amount cannot be negative");
+  if (paidAmount > sup.purchasedAmount) throw err("Paid amount cannot exceed purchased amount");
+  return updateSupplier(id, { paidAmount });
+}

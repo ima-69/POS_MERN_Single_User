@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { FaTachometerAlt, FaShoppingCart, FaBoxOpen, FaTags, FaTruck, FaUsers, FaBars, FaTimes } from 'react-icons/fa'
+import { FaShoppingCart, FaBoxOpen, FaTags, FaTruck, FaUsers, FaBars, FaTimes, FaFileInvoice, FaChartBar } from 'react-icons/fa'
 import { useLogoutMutation } from '../../features/auth/authApi'
 import logo from '../../assets/logo.png'
 
@@ -31,6 +31,7 @@ export default function AppLayout() {
   }
 
   const currentDate = new Date().toDateString()
+
 
 
 
@@ -65,10 +66,6 @@ export default function AppLayout() {
                   <FaShoppingCart className="text-base" />
                   <span className="font-medium text-sm">Sales</span>
                 </NavLink>
-                <NavLink className={link} to="/dashboard">
-                  <FaTachometerAlt className="text-base" />
-                  <span className="font-medium text-sm">Dashboard</span>
-                </NavLink>
                 <NavLink className={link} to="/products">
                   <FaBoxOpen className="text-base" />
                   <span className="font-medium text-sm">Products</span>
@@ -84,6 +81,14 @@ export default function AppLayout() {
                 <NavLink className={link} to="/customers">
                   <FaUsers className="text-base" />
                   <span className="font-medium text-sm">Customers</span>
+                </NavLink>
+                <NavLink className={link} to="/invoices">
+                  <FaFileInvoice className="text-base" />
+                  <span className="font-medium text-sm">Invoices</span>
+                </NavLink>
+                <NavLink className={link} to="/reports">
+                  <FaChartBar className="text-base" />
+                  <span className="font-medium text-sm">Reports & Analytics</span>
                 </NavLink>
               </div>
             </nav>
@@ -130,10 +135,6 @@ export default function AppLayout() {
                 <FaShoppingCart className="text-lg" />
                 <span className="font-medium">Sales</span>
               </NavLink>
-              <NavLink className={link} to="/dashboard" onClick={closeMobileMenu}>
-                <FaTachometerAlt className="text-lg" />
-                <span className="font-medium">Dashboard</span>
-              </NavLink>
               <NavLink className={link} to="/products" onClick={closeMobileMenu}>
                 <FaBoxOpen className="text-lg" />
                 <span className="font-medium">Products</span>
@@ -149,6 +150,14 @@ export default function AppLayout() {
               <NavLink className={link} to="/customers" onClick={closeMobileMenu}>
                 <FaUsers className="text-lg" />
                 <span className="font-medium">Customers</span>
+              </NavLink>
+              <NavLink className={link} to="/invoices" onClick={closeMobileMenu}>
+                <FaFileInvoice className="text-lg" />
+                <span className="font-medium">Invoices</span>
+              </NavLink>
+              <NavLink className={link} to="/reports" onClick={closeMobileMenu}>
+                <FaChartBar className="text-lg" />
+                <span className="font-medium">Reports & Analytics</span>
               </NavLink>
             </nav>
 
@@ -166,49 +175,30 @@ export default function AppLayout() {
 
         {/* Main Content */}
         <main className="flex-1 min-h-screen lg:ml-80">
-          {/* Header */}
-          <header className="h-16 bg-white/80 backdrop-blur-lg shadow-lg border-b border-gray-200/50 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-40">
+          {/* Header - Mobile Only */}
+          <header className="lg:hidden h-16 bg-white/80 backdrop-blur-lg shadow-lg border-b border-gray-200/50 flex items-center justify-between px-4 sticky top-0 z-40">
             <div className="flex items-center gap-3">
               {/* Mobile menu button */}
               <button 
                 onClick={toggleMobileMenu}
-                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
               >
                 <FaBars className="text-lg text-gray-700" />
               </button>
               
               <div>
-                <h1 className="text-lg lg:text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                <h1 className="text-lg font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
                   POS System
                 </h1>
-                <div className="text-xs lg:text-sm text-gray-500">Point of Sale Management</div>
+                <div className="text-xs text-gray-500">Point of Sale Management</div>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 lg:gap-4">
-              {/* Date display */}
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200">
-                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                <div className="text-xs font-medium text-orange-800">
-                  {currentDate}
-                </div>
-              </div>
-
-              {/* User profile placeholder */}
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-                <div className="w-7 h-7 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                  P
-                </div>
-                <div className="hidden sm:block">
-                  <div className="text-xs font-medium text-gray-800">Admin</div>
-                  <div className="text-xs text-gray-500">Online</div>
-                </div>
-              </div>
-            </div>
+            
           </header>
 
           {/* Main Content Area */}
-          <section className="p-4 lg:p-6">
+          <section className="p-2 sm:p-3 lg:p-4">
             <div className="max-w-full">
               <Outlet />
             </div>

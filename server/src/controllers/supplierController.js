@@ -19,3 +19,8 @@ export const remove = (req, res, next) =>
     .removeSup(req.params.id)
     .then(() => res.json({ message: "Deleted" }))
     .catch(next);
+export const updatePaidAmount = (req, res, next) =>
+  s
+    .updatePaidAmount(req.params.id, req.body.paidAmount)
+    .then((d) => res.json(d))
+    .catch(next);

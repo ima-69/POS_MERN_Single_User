@@ -32,6 +32,8 @@ export default function ProductsPage() {
   const [selectedId, setSelectedId] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showProductModal, setShowProductModal] = useState(false);
 
   const [createProduct] = useCreateProductMutation();
   const [updateProduct] = useUpdateProductMutation();
@@ -45,6 +47,39 @@ export default function ProductsPage() {
   useEffect(() => {
     barcodeRef.current?.focus();
   }, []);
+
+  // Helper functions
+  const calculateProfitMargin = (costPrice, retailPrice) => {
+    if (!costPrice || !retailPrice || costPrice === 0) return 0;
+    return ((retailPrice - costPrice) / costPrice * 100).toFixed(1);
+  };
+
+  const getStockStatus = (quantity) => {
+    if (quantity === 0) return { status: "Out of Stock", color: "red" };
+    if (quantity <= 5) return { status: "Low Stock", color: "yellow" };
+    return { status: "In Stock", color: "green" };
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const handleViewMore = (product) => {
+    setSelectedProduct(product);
+    setShowProductModal(true);
+  };
+
+  const closeModal = () => {
+    setShowProductModal(false);
+    setSelectedProduct(null);
+  };
+
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      closeModal();
+    }
+  };
 
   function onEdit(p) {
     setSelectedId(p._id);
@@ -173,22 +208,22 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-2 sm:p-4 lg:p-6">
-      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+    <div className="min-h-screen bg-gray-50 p-2 sm:p-3 lg:p-4">
+      <div className="max-w-6xl mx-auto space-y-3">
         {/* Header Section */}
-        <div className="bg-gradient-to-r from-white to-gray-50 rounded-xl sm:rounded-2xl shadow-lg border border-gray-200/50 p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="bg-gradient-to-r from-white to-gray-50 rounded-xl shadow-lg border border-gray-200/50 p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
                 Product Management
               </h1>
-              <p className="text-sm sm:text-base text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 mt-1">
                 Manage your product inventory
               </p>
             </div>
-            <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg sm:rounded-xl border border-orange-200 self-start sm:self-auto">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200 self-start sm:self-auto">
               <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-              <div className="text-xs sm:text-sm font-medium text-orange-800">
+              <div className="text-xs font-medium text-orange-800">
                 {new Date().toDateString()}
               </div>
             </div>
@@ -230,7 +265,7 @@ export default function ProductsPage() {
                         }
                       }}
                       placeholder="Scan or type barcode, then press Enter"
-                      className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                      className="flex-1 px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                     />
                     <button
                       type="button"
@@ -266,7 +301,7 @@ export default function ProductsPage() {
                   <input
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                    className="w-full px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                     placeholder="Enter product name"
                   />
                 </div>
@@ -282,7 +317,7 @@ export default function ProductsPage() {
                       onChange={(e) =>
                         setForm({ ...form, costPrice: e.target.value })
                       }
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                      className="w-full px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                       placeholder="0.00"
                     />
                   </div>
@@ -296,7 +331,7 @@ export default function ProductsPage() {
                       onChange={(e) =>
                         setForm({ ...form, retailPrice: e.target.value })
                       }
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                      className="w-full px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                       placeholder="0.00"
                     />
                   </div>
@@ -310,7 +345,7 @@ export default function ProductsPage() {
                     type="number"
                     value={form.qty}
                     onChange={(e) => setForm({ ...form, qty: e.target.value })}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                    className="w-full px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                     placeholder="0"
                     readOnly={selectedId ? true : false}
                   />
@@ -326,7 +361,7 @@ export default function ProductsPage() {
                         type="number"
                         value={form.qtyToAdd}
                         onChange={(e) => setForm({ ...form, qtyToAdd: e.target.value })}
-                        className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                        className="flex-1 px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                         placeholder="Enter quantity to add"
                       />
                       <button
@@ -353,7 +388,7 @@ export default function ProductsPage() {
                     onChange={(e) =>
                       setForm({ ...form, category: e.target.value })
                     }
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                    className="w-full px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                   >
                     <option value="">Select category</option>
                     {categories.map((c) => (
@@ -373,7 +408,7 @@ export default function ProductsPage() {
                     onChange={(e) =>
                       setForm({ ...form, supplier: e.target.value })
                     }
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                    className="w-full px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                   >
                     <option value="">Select supplier</option>
                     {suppliers.map((s) => (
@@ -392,7 +427,7 @@ export default function ProductsPage() {
                     type="text"
                     value={form.grnNumber}
                     onChange={(e) => setForm({ ...form, grnNumber: e.target.value })}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                    className="w-full px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                     placeholder="Enter GRN number"
                   />
                 </div>
@@ -760,24 +795,36 @@ export default function ProductsPage() {
                           <div className="flex flex-col items-end gap-1">
                             <span
                               className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                                Number(p.qty) > 10
+                                getStockStatus(Number(p.qty)).color === "green"
                                   ? "bg-green-100 text-green-800"
-                                  : Number(p.qty) > 0
+                                  : getStockStatus(Number(p.qty)).color === "yellow"
                                   ? "bg-yellow-100 text-yellow-800"
                                   : "bg-red-100 text-red-800"
                               }`}
                             >
-                              Qty: {p.qty}
+                              {getStockStatus(Number(p.qty)).status}
                             </span>
                             <div className="text-xs text-gray-500">
-                              {p.category?.name || "No category"}
+                              Qty: {p.qty}
                             </div>
-                            {p.grnNumber && (
-                              <div className="text-xs text-gray-500 mt-1">
-                                GRN: {p.grnNumber}
-                              </div>
-                            )}
                           </div>
+                        </div>
+
+                        {/* Action Button */}
+                        <div className="flex items-center justify-center mt-3 pt-3 border-t border-gray-200">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewMore(p);
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm font-medium"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            View More Details
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -792,117 +839,106 @@ export default function ProductsPage() {
             <table className="w-full">
               <thead className="bg-gray-50 sticky top-0">
                 <tr>
-                  <th className="px-3 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Name
                   </th>
-                  <th className="px-3 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Barcode
                   </th>
-                  <th className="px-3 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Stock Status
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Qty
                   </th>
-                  <th className="px-3 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Cost
                   </th>
-                  <th className="px-3 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Retail
                   </th>
-                  <th className="px-3 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-3 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Supplier
-                  </th>
-                  <th className="px-3 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    GRN Number
-                  </th>
-                  <th className="px-3 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Image
+                  <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    View More
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {products.map((p) => (
-                  <tr
-                    key={p._id}
-                    onClick={() => onEdit(p)}
-                    className={`cursor-pointer transition-all duration-200 hover:bg-orange-50 ${
-                      selectedId === p._id
-                        ? "bg-orange-100 border-l-4 border-orange-500"
-                        : ""
-                    }`}
-                  >
-                    <td className="px-3 lg:px-6 py-4">
-                      <div className="flex items-center gap-2 lg:gap-3">
-                        <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-semibold text-xs lg:text-sm flex-shrink-0">
-                          {p.name?.charAt(0)?.toUpperCase() || "P"}
-                        </div>
-                        <div className="font-medium text-gray-900 text-sm lg:text-base truncate">
-                          {p.name}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 lg:px-6 py-4 text-xs lg:text-sm text-gray-700">
-                      {p.barcode}
-                    </td>
-                    <td className="px-3 lg:px-6 py-4">
-                      <span
-                        className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                          Number(p.qty) > 10
-                            ? "bg-green-100 text-green-800"
-                            : Number(p.qty) > 0
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {p.qty}
-                      </span>
-                    </td>
-                    <td className="px-3 lg:px-6 py-4 text-xs lg:text-sm text-gray-700">
-                      Rs {Number(p.costPrice).toFixed(2)}
-                    </td>
-                    <td className="px-3 lg:px-6 py-4 text-xs lg:text-sm text-gray-700">
-                      Rs {Number(p.retailPrice).toFixed(2)}
-                    </td>
-                    <td className="px-3 lg:px-6 py-4 text-xs lg:text-sm text-gray-700 truncate max-w-[100px]">
-                      {p.category?.name || "-"}
-                    </td>
-                    <td className="px-3 lg:px-6 py-4 text-xs lg:text-sm text-gray-700 truncate max-w-[100px]">
-                      {p.supplier?.name || "-"}
-                    </td>
-                    <td className="px-3 lg:px-6 py-4 text-xs lg:text-sm text-gray-700 truncate max-w-[100px]">
-                      {p.grnNumber || "-"}
-                    </td>
-                    <td className="px-3 lg:px-6 py-4">
-                      {p.image?.url ? (
-                        <img
-                          src={p.image.url}
-                          alt="Product"
-                          className="h-10 w-10 lg:h-12 lg:w-12 rounded-lg object-cover border border-gray-200"
-                        />
-                      ) : (
-                        <div className="h-10 w-10 lg:h-12 lg:w-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <svg
-                            className="w-5 h-5 lg:w-6 lg:h-6 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                {products.map((p) => {
+                  const stockStatus = getStockStatus(Number(p.qty));
+                  
+                  return (
+                    <tr
+                      key={p._id}
+                      onClick={() => onEdit(p)}
+                      className={`cursor-pointer transition-all duration-200 hover:bg-orange-50 ${
+                        selectedId === p._id
+                          ? "bg-orange-100 border-l-4 border-orange-500"
+                          : ""
+                      }`}
+                    >
+                      <td className="px-3 py-3">
+                        <div className="flex items-center gap-2 lg:gap-3">
+                          {p.image?.url ? (
+                            <img
+                              src={p.image.url}
+                              alt="Product"
+                              className="h-8 w-8 lg:h-10 lg:w-10 rounded-lg object-cover border border-gray-200 flex-shrink-0"
                             />
-                          </svg>
+                          ) : (
+                            <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-semibold text-xs lg:text-sm flex-shrink-0">
+                              {p.name?.charAt(0)?.toUpperCase() || "P"}
+                            </div>
+                          )}
+                          <div className="font-medium text-gray-900 text-sm lg:text-base truncate">
+                            {p.name}
+                          </div>
                         </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-3 py-3 text-xs lg:text-sm text-gray-700 font-mono">
+                        {p.barcode}
+                      </td>
+                      <td className="px-3 py-3">
+                        <span
+                          className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                            stockStatus.color === "green"
+                              ? "bg-green-100 text-green-800"
+                              : stockStatus.color === "yellow"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {stockStatus.status}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3">
+                        <span className="text-sm font-medium text-gray-900">
+                          {p.qty}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3 text-xs lg:text-sm text-gray-700 font-mono">
+                        Rs {Number(p.costPrice).toFixed(2)}
+                      </td>
+                      <td className="px-3 py-3 text-xs lg:text-sm text-gray-700 font-mono">
+                        Rs {Number(p.retailPrice).toFixed(2)}
+                      </td>
+                      <td className="px-3 py-3">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewMore(p);
+                          }}
+                          className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg text-sm font-medium"
+                          title="View Details"
+                        >
+                          View More
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
                 {products.length === 0 && (
                   <tr>
-                    <td colSpan="8" className="px-6 py-12 text-center">
+                    <td colSpan="7" className="px-6 py-12 text-center">
                       <div className="flex flex-col items-center justify-center">
                         <svg
                           className="w-16 h-16 text-gray-300 mb-4"
@@ -931,6 +967,213 @@ export default function ProductsPage() {
             </table>
           </div>
         </div>
+
+        {/* Product Details Modal */}
+        {showProductModal && selectedProduct && (
+          <div 
+            className="fixed inset-0 flex items-center justify-center p-4 z-50 animate-in fade-in duration-300"
+            onClick={handleBackdropClick}
+          >
+            <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300 transform">
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    {selectedProduct.image?.url ? (
+                      <img
+                        src={selectedProduct.image.url}
+                        alt="Product"
+                        className="h-16 w-16 rounded-lg object-cover border-2 border-white shadow-lg"
+                      />
+                    ) : (
+                      <div className="h-16 w-16 bg-white bg-opacity-20 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                        {selectedProduct.name?.charAt(0)?.toUpperCase() || "P"}
+                      </div>
+                    )}
+                    <div>
+                      <h2 className="text-2xl font-bold text-white">{selectedProduct.name}</h2>
+                      <p className="text-orange-100">Barcode: {selectedProduct.barcode}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={closeModal}
+                    className="text-white hover:text-orange-200 hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-all duration-200"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Left Column - Basic Info */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
+                      Basic Information
+                    </h3>
+                    
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Product Name:</span>
+                        <span className="font-medium text-gray-900">{selectedProduct.name}</span>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Barcode:</span>
+                        <span className="font-mono text-gray-900">{selectedProduct.barcode}</span>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Category:</span>
+                        <span className="font-medium text-gray-900">
+                          {selectedProduct.category?.name || "Not assigned"}
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Supplier:</span>
+                        <span className="font-medium text-gray-900">
+                          {selectedProduct.supplier?.name || "Not assigned"}
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">GRN Number:</span>
+                        <span className="font-medium text-gray-900">
+                          {selectedProduct.grnNumber || "Not provided"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column - Financial Info */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-800 border-b border-gray-200 pb-2">
+                      Financial Information
+                    </h3>
+                    
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Cost Price:</span>
+                        <span className="font-mono text-gray-900">
+                          Rs {Number(selectedProduct.costPrice).toFixed(2)}
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Retail Price:</span>
+                        <span className="font-mono text-gray-900">
+                          Rs {Number(selectedProduct.retailPrice).toFixed(2)}
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Profit Margin:</span>
+                        <span className={`font-medium ${
+                          calculateProfitMargin(Number(selectedProduct.costPrice), Number(selectedProduct.retailPrice)) > 20
+                            ? "text-green-600"
+                            : calculateProfitMargin(Number(selectedProduct.costPrice), Number(selectedProduct.retailPrice)) > 10
+                            ? "text-yellow-600"
+                            : "text-red-600"
+                        }`}>
+                          {calculateProfitMargin(Number(selectedProduct.costPrice), Number(selectedProduct.retailPrice))}%
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Profit Amount:</span>
+                        <span className="font-mono text-gray-900">
+                          Rs {(Number(selectedProduct.retailPrice) - Number(selectedProduct.costPrice)).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stock Information */}
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Stock Information</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600">Current Stock:</span>
+                        <span className="text-2xl font-bold text-blue-900">{selectedProduct.qty}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600">Stock Status:</span>
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          getStockStatus(Number(selectedProduct.qty)).color === "green"
+                            ? "bg-green-100 text-green-800"
+                            : getStockStatus(Number(selectedProduct.qty)).color === "yellow"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-red-100 text-red-800"
+                        }`}>
+                          {getStockStatus(Number(selectedProduct.qty)).status}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600">Total Value:</span>
+                        <span className="font-mono text-purple-900 font-semibold">
+                          Rs {(Number(selectedProduct.qty) * Number(selectedProduct.costPrice)).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Timestamps */}
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Timestamps</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Created:</span>
+                      <span className="font-medium text-gray-900">
+                        {formatDate(selectedProduct.createdAt)}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Last Updated:</span>
+                      <span className="font-medium text-gray-900">
+                        {formatDate(selectedProduct.updatedAt)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="mt-6 pt-6 border-t border-gray-200 flex justify-end gap-3">
+                  <button
+                    onClick={() => {
+                      onEdit(selectedProduct);
+                      closeModal();
+                    }}
+                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium"
+                  >
+                    Edit Product
+                  </button>
+                  <button
+                    onClick={closeModal}
+                    className="px-6 py-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

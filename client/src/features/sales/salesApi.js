@@ -6,7 +6,17 @@ export const salesApi = api.injectEndpoints({
       query: () => ({ url: '/sales/next' })
     }),
     createSale: build.mutation({
-      query: (body) => ({ url: '/sales', method: 'POST', body })
+      query: (body) => ({ url: '/sales', method: 'POST', body }),
+      invalidatesTags: (result, error, arg) => {
+        // If a customer is selected, invalidate their cache
+        if (arg.customerId) {
+          return [
+            { type: 'Customer', id: arg.customerId },
+            { type: 'Customer', id: 'LIST' }
+          ];
+        }
+        return [];
+      }
     })
   })
 })
